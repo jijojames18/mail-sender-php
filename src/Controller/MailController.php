@@ -47,14 +47,14 @@ class MailController
     private function process()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $website = isset($data["site"]) ? $data["site"] : '';
+        $website = isset($data["site"]) ? htmlentities($data["site"]) : '';
         $sanitizedWebsite = filter_var($website,  FILTER_SANITIZE_URL);
         if ($sanitizedWebsite === '' || $sanitizedWebsite === null)
         {
             throw new EmptyWebsiteException();
         }
 
-        $captcha = isset($data["captcha"]) ? $data["captcha"] : '';
+        $captcha = isset($data["captcha"]) ? htmlentities($data["captcha"]) : '';
         $sanitizedCaptcha = filter_var($captcha,  FILTER_SANITIZE_STRING);
         if ($sanitizedCaptcha === '' || $sanitizedCaptcha === null)
         {
@@ -83,7 +83,7 @@ class MailController
 
         foreach ($formData as $key => $value)
         {
-            $formData[$key] = filter_var($formData[$key], FILTER_UNSAFE_RAW);
+            $formData[$key] = htmlentities(filter_var($formData[$key], FILTER_UNSAFE_RAW));
             if ($key === "subject")
             {
                 $customSubject = $formData[$key];
