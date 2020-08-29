@@ -24,7 +24,7 @@ class ReCaptcha
     private function initCurl()
     {
         $fields = [
-            'secret '  => RECAPTCHA_SITE_KEY,
+            'secret'   => RECAPTCHA_SITE_KEY,
             'response' => $this->captcha,
         ];
         $fields_string = http_build_query($fields);
