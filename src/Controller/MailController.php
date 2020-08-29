@@ -3,8 +3,10 @@ namespace Controller;
 
 use CustomException\EmptyWebsiteException;
 use CustomException\CaptchaException;
+use CustomException\DocumentNotFoundException;
 
 use Service\ReCaptcha;
+use Service\Firebase;
 
 class MailController
 {
@@ -24,11 +26,8 @@ class MailController
             case 'POST':
                 try {
                     $result = $this->process();
-                    echo json_encode(array(
-                        'result' => $result
-                    ));
                     header('HTTP/1.1 200 OK');
-                } catch(EmptyWebsiteException | CaptchaException $e) {
+                } catch(EmptyWebsiteException | CaptchaException | DocumentNotFoundException $e) {
                     echo $e->getErrorResponse();
                     header('HTTP/1.1 400 Bad Request');
                 } catch(Exception $e) {
@@ -67,6 +66,14 @@ class MailController
             throw new CaptchaException();
         }
 
+        $firebase = new Firebase($sanitizedWebsite);
+        $websiteDetails = $firebase->getDocument();
+        if (!isset($websiteDetails["email"]) || !isset($websiteDetails["mail-template"]))
+        {
+            throw new DocumentNotFoundException();
+        }
 
+        $email = $websiteDetails["email"];
+        $mailTemplate = $websiteDetails["mail-template"];
     }
 }
