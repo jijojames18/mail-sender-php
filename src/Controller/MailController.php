@@ -2,6 +2,9 @@
 namespace Controller;
 
 use CustomException\EmptyWebsiteException;
+use CustomException\CaptchaException;
+
+use Service\ReCaptcha;
 
 class MailController
 {
@@ -25,7 +28,7 @@ class MailController
                         'result' => $result
                     ));
                     header('HTTP/1.1 200 OK');
-                } catch(EmptyWebsiteException $e) {
+                } catch(EmptyWebsiteException | CaptchaException $e) {
                     echo $e->getErrorResponse();
                     header('HTTP/1.1 400 Bad Request');
                 } catch(Exception $e) {
@@ -49,5 +52,21 @@ class MailController
         {
             throw new EmptyWebsiteException();
         }
+
+        $captcha = isset($_POST["captcha"]) ? $_POST["captcha"] : '';
+        $sanitizedCaptcha = filter_var($captcha,  FILTER_SANITIZE_STRING);
+        if ($sanitizedCaptcha === '' || $sanitizedCaptcha === null)
+        {
+            throw new CaptchaException();
+        }
+
+        $reCaptcha = new ReCaptcha($captcha);
+        $reCaptchaResult = $reCaptcha->verifyCaptcha();
+        if (!json_decode($reCaptchaResult, true)["success"])
+        {
+            throw new CaptchaException();
+        }
+
+
     }
 }
