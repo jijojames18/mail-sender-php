@@ -80,6 +80,7 @@ class MailController
 
         $formData = isset($data["formData"]) ? $data["formData"] : array();
         $customSubject = "";
+        $customEmail = "";
 
         foreach ($formData as $key => $value)
         {
@@ -88,13 +89,19 @@ class MailController
             {
                 $customSubject = $formData[$key];
             }
+            if ($key === "email")
+            {
+                $customEmail = htmlentities(filter_var($formData[$key], FILTER_SANITIZE_EMAIL));
+            }
+
             $mailTemplate = str_replace('${' . $key . '}', $formData[$key], $mailTemplate);
         }
 
-        $subject = isset($customSubject) ? $customSubject : "Contact form";
+        $subject = isset($customSubject) ? $customSubject : "Contact form response";
+        $fromAddress = isset($customEmail) ? $customEmail : EMAIL_FROM_ADDRESS;
 
-        $headers = 'From: ' . EMAIL_FROM_ADDRESS_NAME  . ' <' . EMAIL_FROM_ADDRESS . '>' . PHP_EOL .
-			'Reply-To: ' . EMAIL_FROM_ADDRESS_NAME  . ' <' . EMAIL_FROM_ADDRESS . '>' . PHP_EOL .
+        $headers = 'From: ' . EMAIL_FROM_ADDRESS_NAME  . ' <' . $fromAddress . '>' . PHP_EOL .
+			'Reply-To: ' . EMAIL_FROM_ADDRESS_NAME  . ' <' . $fromAddress . '>' . PHP_EOL .
             'X-Mailer: PHP/' . phpversion();
 
         $mailService = new Email();
