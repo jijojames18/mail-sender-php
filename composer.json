@@ -1,5 +1,8 @@
 {
     "require": {
-        "vlucas/phpdotenv": "^2.4"
+        "vlucas/phpdotenv": "^2.4",
+        "grpc/grpc": "^v1.27.0",
+        "google/protobuf": "^v3.3.0",
+        "google/cloud-firestore": "^1.14"
     }
 }
