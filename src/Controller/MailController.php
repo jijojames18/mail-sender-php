@@ -7,6 +7,7 @@ use CustomException\DocumentNotFoundException;
 
 use Service\ReCaptcha;
 use Service\Firebase;
+use Service\Email;
 
 class MailController
 {
@@ -45,14 +46,15 @@ class MailController
 
     private function process()
     {
-        $website = isset($_POST["site"]) ? $_POST["site"] : '';
+        $data = json_decode(file_get_contents('php://input'), true);
+        $website = isset($data["site"]) ? $data["site"] : '';
         $sanitizedWebsite = filter_var($website,  FILTER_SANITIZE_URL);
         if ($sanitizedWebsite === '' || $sanitizedWebsite === null)
         {
             throw new EmptyWebsiteException();
         }
 
-        $captcha = isset($_POST["captcha"]) ? $_POST["captcha"] : '';
+        $captcha = isset($data["captcha"]) ? $data["captcha"] : '';
         $sanitizedCaptcha = filter_var($captcha,  FILTER_SANITIZE_STRING);
         if ($sanitizedCaptcha === '' || $sanitizedCaptcha === null)
         {
@@ -75,5 +77,27 @@ class MailController
 
         $email = $websiteDetails["email"];
         $mailTemplate = $websiteDetails["mail-template"];
+
+        $formData = isset($data["formData"]) ? $data["formData"] : array();
+        $customSubject = "";
+
+        foreach ($formData as $key => $value)
+        {
+            $formData[$key] = filter_var($formData[$key], FILTER_UNSAFE_RAW);
+            if ($key === "subject")
+            {
+                $customSubject = $formData[$key];
+            }
+            $mailTemplate = str_replace('${' . $key . '}', $formData[$key], $mailTemplate);
+        }
+
+        $subject = isset($customSubject) ? $customSubject : "Contact form";
+
+        $headers = 'From: ' . EMAIL_FROM_ADDRESS_NAME  . ' <' . EMAIL_FROM_ADDRESS . '>' . PHP_EOL .
+			'Reply-To: ' . EMAIL_FROM_ADDRESS_NAME  . ' <' . EMAIL_FROM_ADDRESS . '>' . PHP_EOL .
+            'X-Mailer: PHP/' . phpversion();
+
+        $mailService = new Email();
+        $mailService->sendEmail($email, $subject, $mailTemplate, $headers);
     }
 }

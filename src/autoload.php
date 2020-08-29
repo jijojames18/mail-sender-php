@@ -5,6 +5,8 @@ require 'Controller/MailController.php';
 
 require 'Service/ReCaptcha.php';
 require 'Service/Firebase.php';
+require 'Service/Email.php';
+
 
 require 'CustomException/EmptyWebsiteException.php';
 require 'CustomException/CaptchaException.php';
