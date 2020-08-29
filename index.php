@@ -15,15 +15,12 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 $uriSize = sizeof($uri);
 
-$mailIndex = array_search("send-email", $uri);
+$mailIndex = array_search('send-email', $uri);
 $isMailRequest = $mailIndex !== null && $mailIndex === ($uriSize - 1);
 
-if ($isMailRequest)
-{
+if ($isMailRequest) {
     $controller = (new MailController($requestMethod))->processRequest();
-}
-else
-{
+} else {
     header("HTTP/1.1 404 Not Found");
     exit();
 }

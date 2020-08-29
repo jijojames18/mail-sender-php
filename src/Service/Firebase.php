@@ -2,9 +2,12 @@
 namespace Service;
 
 use Google\Cloud\Firestore\FirestoreClient;
+use Model\FirebaseDocument;
 
 class Firebase
 {
+    const COLLECTION_NAME = 'websites';
+
     private $site = null;
     private $firestore = null;
 
@@ -20,9 +23,9 @@ class Firebase
 
     public function getDocument()
     {
-        $collectionReference = $this->firestore->collection('websites');
+        $collectionReference = $this->firestore->collection(self::COLLECTION_NAME);
         $documentReference = $collectionReference->document($this->site);
         $snapshot = $documentReference->snapshot();
-        return $snapshot;
+        return new FirebaseDocument($snapshot);
     }
 }
