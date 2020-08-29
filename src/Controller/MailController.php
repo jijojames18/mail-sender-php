@@ -37,14 +37,14 @@ class MailController
                     $result = $this->process();
                     header('HTTP/1.1 200 OK');
                 } catch (EmptyWebsiteException | CaptchaException | DocumentNotFoundException $e) {
-                    echo $e->getErrorResponse();
                     header('HTTP/1.1 400 Bad Request');
+                    echo $e->getErrorResponse();
                 } catch (Exception $e) {
+                    header('HTTP/1.1 500 Internal Server Error');
                     echo json_encode(array(
                         "error-code" => 500,
                         "error-message" => "An internal error occurred"
                     ));
-                    header('HTTP/1.1 500 Internal Server Error');
                 }
             break;
             default:
@@ -83,8 +83,8 @@ class MailController
         $mailTemplate = $website->getMailTemplate();
 
         $formData = isset($data[self::REQUEST_FORM_DATA_KEY]) ? $data[self::REQUEST_FORM_DATA_KEY] : array();
-        $customSubject = "";
-        $customEmail = "";
+        $customSubject = null;
+        $customEmail = null;
 
         foreach ($formData as $key => $value) {
             $formData[$key] = htmlentities(filter_var($formData[$key], FILTER_UNSAFE_RAW));
